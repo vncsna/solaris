@@ -1,0 +1,30 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres:13
+    volumes:
+      - ./database/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=solaris
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    restart: always
+    command: >
+        sh -c "python manage.py migrate &&
+               python manage.py loaddata people_data &&
+               python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+# References
+# https://docs.docker.com/samples/django/
+
+# Problem
+# App restarting too many times while waiting for the db
